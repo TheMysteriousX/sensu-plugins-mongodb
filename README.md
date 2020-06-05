@@ -1,14 +1,14 @@
 ## Sensu-Plugins-mongodb
 
-[![Build Status](https://travis-ci.org/sensu-plugins/sensu-plugins-mongodb.svg?branch=master)](https://travis-ci.org/sensu-plugins/sensu-plugins-mongodb)
-[![Gem Version](https://badge.fury.io/rb/sensu-plugins-mongodb.svg)](http://badge.fury.io/rb/sensu-plugins-mongodb)
-[![Code Climate](https://codeclimate.com/github/sensu-plugins/sensu-plugins-mongodb/badges/gpa.svg)](https://codeclimate.com/github/sensu-plugins/sensu-plugins-mongodb)
-[![Test Coverage](https://codeclimate.com/github/sensu-plugins/sensu-plugins-mongodb/badges/coverage.svg)](https://codeclimate.com/github/sensu-plugins/sensu-plugins-mongodb)
-[![Dependency Status](https://gemnasium.com/sensu-plugins/sensu-plugins-mongodb.svg)](https://gemnasium.com/sensu-plugins/sensu-plugins-mongodb)
+[![Gem Version](https://badge.fury.io/rb/sensu-plugins-mongodb-boutetnico.svg)](https://badge.fury.io/rb/sensu-plugins-mongodb-boutetnico.svg)
+[![Sensu Bonsai Asset](https://img.shields.io/badge/Bonsai-Download%20Me-brightgreen.svg?colorB=89C967&logo=sensu)](https://bonsai.sensu.io/assets/boutetnico/sensu-plugins-mongodb)
 
-## Functionality
+## This is an unofficial fork
+
+This fork is automatically tested, built and published to [RubyGems](https://rubygems.org/gems/sensu-plugins-mongodb-boutetnico/) and [Bonsai](https://bonsai.sensu.io/assets/boutetnico/sensu-plugins-mongodb).
 
 ## Files
+
  * bin/check-mongodb.py
  * bin/check-mongodb.rb - wrapper for check-mongodb.py
  * bin/check-mongodb-metric.rb

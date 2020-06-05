@@ -1,4 +1,3 @@
-
 MethodLength:
   Max: 200
 
@@ -30,4 +29,27 @@ Style/Documentation:
   Enabled: false
 
 Style/FormatString:
+  Enabled: false
+
+Style/FrozenStringLiteralComment:
+  Enabled: false
+
+Style/ClassVars:
+  Exclude:
+    - test/**/*.rb
+
+Metrics/BlockLength:
+  Exclude:
+    - test/**/*.rb
+
+Style/MixinUsage:
+  Enabled: false
+
+Naming/MethodParameterName:
+  Enabled: false
+
+Style/FormatStringToken:
+  Enabled: false
+
+Layout/HashAlignment:
   Enabled: false

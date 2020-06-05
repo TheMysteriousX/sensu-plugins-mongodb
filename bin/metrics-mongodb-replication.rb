@@ -108,6 +108,7 @@ class MongoDB < Sensu::Plugin::Metric::CLI::Graphite
     unless rs.successful?
       return nil
     end
+
     rs.documents[0]
   end
 

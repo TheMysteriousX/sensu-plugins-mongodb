@@ -25,13 +25,12 @@ module SensuPluginsMongoDB
 
       db_user = @config[:user]
       db_password = @config[:password]
+      @mongo_client = get_mongo_client(db_name)
 
       if Gem.loaded_specs['mongo'].version < Gem::Version.new('2.0.0')
-        @mongo_client = get_mongo_client(db_name)
         @db = @mongo_client.db(db_name)
         @db.authenticate(db_user, db_password) unless db_user.nil?
       else
-        @mongo_client = get_mongo_client(db_name)
         @db = @mongo_client.database
       end
     end
@@ -52,6 +51,7 @@ module SensuPluginsMongoDB
       unless rs.successful?
         return nil
       end
+
       rs.documents[0]
     end
 
@@ -80,7 +80,8 @@ module SensuPluginsMongoDB
     def server_status
       status = get_mongo_doc('serverStatus' => 1)
       return nil if status.nil? || status['ok'] != 1
-      return status
+
+      status
     rescue StandardError => e
       if @debug
         puts 'Error checking serverStatus: ' + e.message
@@ -94,7 +95,8 @@ module SensuPluginsMongoDB
     def replicaset_status
       status = get_mongo_doc('replSetGetStatus' => 1)
       return nil if status.nil?
-      return status
+
+      status
     rescue StandardError => e
       if @debug
         puts 'Error checking replSetGetStatus: ' + e.message
@@ -228,18 +230,19 @@ module SensuPluginsMongoDB
       # Locks (from mongo 3.0+ only)
       unless Gem::Version.new(mongo_version) < Gem::Version.new('3.0.0')
         locks = server_status['locks']
-        lock_namespaces = %w(
+        lock_namespaces = %w[
           Collection Global Database Metadata
           MMAPV1Journal oplog
-        )
-        lock_dimentions = %w(
+        ]
+        lock_dimentions = %w[
           acquireCount acquireWaitCount
           timeAcquiringMicros deadlockCount
-        )
+        ]
 
         lock_namespaces.each do |ns|
           lock_dimentions.each do |dm|
             next unless locks.key?(ns) && locks[ns].key?(dm)
+
             lock = locks[ns][dm]
             server_metrics["locks.#{ns}.#{dm}_r"] = lock['r'] if lock.key?('r')
             server_metrics["locks.#{ns}.#{dm}_w"] = lock['r'] if lock.key?('w')
@@ -348,6 +351,7 @@ module SensuPluginsMongoDB
       clean_metrics = {}
       server_metrics.each do |k, v|
         next if v.nil?
+
         if v.is_a?(Hash) && v.key?('floatApprox')
           v = v['floatApprox']
         end
@@ -355,6 +359,7 @@ module SensuPluginsMongoDB
       end
       clean_metrics
     end
+    # rubocop:enable Metrics/AbcSize
 
     private
 
