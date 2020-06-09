@@ -12,6 +12,7 @@ This fork is automatically tested, built and published to [RubyGems](https://rub
  * bin/check-mongodb.py
  * bin/check-mongodb.rb - wrapper for check-mongodb.py
  * bin/check-mongodb-metric.rb
+ * bin/check-mongodb-query-count.rb
  * bin/metrics-mongodb.rb
  * bin/metrics-mongodb-replication.rb
 
