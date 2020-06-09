@@ -27,12 +27,7 @@ module SensuPluginsMongoDB
       db_password = @config[:password]
       @mongo_client = get_mongo_client(db_name)
 
-      if Gem.loaded_specs['mongo'].version < Gem::Version.new('2.0.0')
-        @db = @mongo_client.db(db_name)
-        @db.authenticate(db_user, db_password) unless db_user.nil?
-      else
-        @db = @mongo_client.database
-      end
+      @db = @mongo_client.database
     end
 
     # Fetches a document from the mongo db.
@@ -321,10 +316,13 @@ module SensuPluginsMongoDB
       server_metrics['metrics.repl.network.getmores_totalMillis'] = repl['network']['getmores']['totalMillis']
       server_metrics['metrics.repl.network.ops'] = repl['network']['ops']
       server_metrics['metrics.repl.network.readersCreated'] = repl['network']['readersCreated']
-      server_metrics['metrics.repl.preload.docs_num'] = repl['preload']['docs']['num']
-      server_metrics['metrics.repl.preload.docs_totalMillis'] = repl['preload']['docs']['totalMillis']
-      server_metrics['metrics.repl.preload.indexes_num'] = repl['preload']['indexes']['num']
-      server_metrics['metrics.repl.preload.indexes_totalMillis'] = repl['preload']['indexes']['totalMillis']
+
+      if Gem::Version.new(mongo_version) <= Gem::Version.new('4.0.0')
+        server_metrics['metrics.repl.preload.docs_num'] = repl['preload']['docs']['num']
+        server_metrics['metrics.repl.preload.docs_totalMillis'] = repl['preload']['docs']['totalMillis']
+        server_metrics['metrics.repl.preload.indexes_num'] = repl['preload']['indexes']['num']
+        server_metrics['metrics.repl.preload.indexes_totalMillis'] = repl['preload']['indexes']['totalMillis']
+      end
 
       # Metrics (replicaset status)
       # MongoDB will fail if not running with --replSet, hence the check for nil
@@ -333,7 +331,7 @@ module SensuPluginsMongoDB
       end
 
       # Metrics (storage)
-      if Gem::Version.new(mongo_version) >= Gem::Version.new('2.6.0')
+      if Gem::Version.new(mongo_version) <= Gem::Version.new('4.0.0')
         freelist = server_status['metrics']['storage']['freelist']
         server_metrics['metrics.storage.freelist.search_bucketExhauseted'] = freelist['search']['bucketExhausted']
         server_metrics['metrics.storage.freelist.search_requests'] = freelist['search']['requests']
@@ -375,25 +373,21 @@ module SensuPluginsMongoDB
       ssl_ca_cert = @config[:ssl_ca_cert]
       ssl_verify = @config[:ssl_verify]
 
-      if Gem.loaded_specs['mongo'].version < Gem::Version.new('2.0.0')
-        MongoClient.new(host, port)
-      else
-        address_str = "#{host}:#{port}"
-        client_opts = {}
-        client_opts[:database] = db_name
-        unless db_user.nil?
-          client_opts[:user] = db_user
-          client_opts[:password] = db_password
-        end
-        if ssl
-          client_opts[:ssl] = true
-          client_opts[:ssl_cert] = ssl_cert
-          client_opts[:ssl_key] = ssl_key
-          client_opts[:ssl_ca_cert] = ssl_ca_cert
-          client_opts[:ssl_verify] = ssl_verify
-        end
-        Mongo::Client.new([address_str], client_opts)
+      address_str = "#{host}:#{port}"
+      client_opts = {}
+      client_opts[:database] = db_name
+      unless db_user.nil?
+        client_opts[:user] = db_user
+        client_opts[:password] = db_password
       end
+      if ssl
+        client_opts[:ssl] = true
+        client_opts[:ssl_cert] = ssl_cert
+        client_opts[:ssl_key] = ssl_key
+        client_opts[:ssl_ca_cert] = ssl_ca_cert
+        client_opts[:ssl_verify] = ssl_verify
+      end
+      Mongo::Client.new([address_str], client_opts)
     end
   end
 end
