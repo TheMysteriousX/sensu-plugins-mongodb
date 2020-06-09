@@ -23,8 +23,6 @@ module SensuPluginsMongoDB
         raise 'Already connected to a database'
       end
 
-      db_user = @config[:user]
-      db_password = @config[:password]
       @mongo_client = get_mongo_client(db_name)
 
       @db = @mongo_client.database
