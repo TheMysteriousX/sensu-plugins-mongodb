@@ -112,30 +112,23 @@ class MongoDB < Sensu::Plugin::Metric::CLI::Graphite
     rs.documents[0]
   end
 
-  # connects to mongo and sets @db, works with MongoClient < 2.0.0
   def connect_mongo_db
-    if Gem.loaded_specs['mongo'].version < Gem::Version.new('2.0.0')
-      mongo_client = MongoClient.new(host, port)
-      @db = mongo_client.db(db_name)
-      @db.authenticate(db_user, db_password) unless db_user.nil?
-    else
-      address_str = "#{config[:host]}:#{config[:port]}"
-      client_opts = {}
-      client_opts[:database] = 'admin'
-      unless config[:user].nil?
-        client_opts[:user] = config[:user]
-        client_opts[:password] = config[:password]
-      end
-      if config[:ssl]
-        client_opts[:ssl] = true
-        client_opts[:ssl_cert] = config[:ssl_cert]
-        client_opts[:ssl_key] = config[:ssl_key]
-        client_opts[:ssl_ca_cert] = config[:ssl_ca_cert]
-        client_opts[:ssl_verify] = config[:ssl_verify]
-      end
-      mongo_client = Mongo::Client.new([address_str], client_opts)
-      @db = mongo_client.database
+    address_str = "#{config[:host]}:#{config[:port]}"
+    client_opts = {}
+    client_opts[:database] = 'admin'
+    unless config[:user].nil?
+      client_opts[:user] = config[:user]
+      client_opts[:password] = config[:password]
     end
+    if config[:ssl]
+      client_opts[:ssl] = true
+      client_opts[:ssl_cert] = config[:ssl_cert]
+      client_opts[:ssl_key] = config[:ssl_key]
+      client_opts[:ssl_ca_cert] = config[:ssl_ca_cert]
+      client_opts[:ssl_verify] = config[:ssl_verify]
+    end
+    mongo_client = Mongo::Client.new([address_str], client_opts)
+    @db = mongo_client.database
   end
 
   def run
@@ -225,8 +218,6 @@ class MongoDB < Sensu::Plugin::Metric::CLI::Graphite
   def gather_replication_metrics(replication_status)
     replication_metrics = {}
 
-    replication_metrics['replica_set'] = replication_status['set']
-    replication_metrics['date'] = replication_status['date']
     replication_metrics['myState'] = replication_status['myState']
     replication_metrics['term'] = replication_status['term']
     replication_metrics['heartbeatIntervalMillis'] = replication_status['heartbeatIntervalMillis']
@@ -238,14 +229,11 @@ class MongoDB < Sensu::Plugin::Metric::CLI::Graphite
     replication_member_metrics = {}
 
     replication_member_metrics['id'] = replication_member_details['_id']
-    replication_member_metrics['name'] = replication_member_details['name']
     replication_member_metrics['health'] = replication_member_details['health']
     replication_member_metrics['state'] = replication_member_details['state']
-    replication_member_metrics['stateStr'] = replication_member_details['stateStr']
     member_hierarchy = replication_member_details['stateStr']
     if member_hierarchy == 'PRIMARY'
       @primary_optime_date = replication_member_details['optimeDate']
-      replication_member_metrics['primary.startOptimeDate'] = @primary_optime_date
     end
     if member_hierarchy == 'SECONDARY'
       @secondary_optime_date = replication_member_details['optimeDate']
@@ -256,12 +244,9 @@ class MongoDB < Sensu::Plugin::Metric::CLI::Graphite
       replication_member_metrics['minutesBehindPrimary'] = difference_in_minutes
       replication_member_metrics['hoursBehindPrimary'] = difference_in_hours
     end
-    replication_member_metrics['optimeDate'] = replication_member_details['optimeDate']
     replication_member_metrics['uptime'] = replication_member_details['uptime']
-    replication_member_metrics['lastHeartbeat'] = replication_member_details['lastHeartbeat']
     replication_member_metrics['lastHeartbeatRecv'] = replication_member_details['lastHeartbeatiRecv']
     replication_member_metrics['pingMs'] = replication_member_details['pingMs']
-    replication_member_metrics['syncingTo'] = replication_member_details['syncingTo']
     replication_member_metrics['configVersion'] = replication_member_details['configVersion']
 
     replication_member_metrics
